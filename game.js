@@ -4,13 +4,14 @@ let yellowBowl;
 let greenBowl;
 let orangeBowl;
 let speachBubble;
+
 //paddle var/const
 const paddleMove = 5;
 let paddleX = 700;
 
 //ball variables
 let ballX = 350;
-let ballY = 300;
+let ballY = 200;
 let r = 20;
 let speedX = 5;
 let speedY = 2;
@@ -193,10 +194,10 @@ function draw() {
   // Ball movement inspired by https://editor.p5js.org/icm/sketches/BJKWv5Tn
   ballX += speedX;
   ballY += speedY;
-  if (ballX > width - r || ballX < r) {
+  if (ballX > 700 - r || ballX < 0-r || ) {
     speedX = -speedX;
   }
-  if (ballY > height - r || ballY < r) {
+  if (ballY > 400 - r || ballY < 0-r) {
     speedY = -speedY;
   }
 }
