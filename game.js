@@ -4,6 +4,8 @@ let yellowBowl;
 let greenBowl;
 let orangeBowl;
 let speachBubble;
+const speed = 5;
+let paddleX = 700;
 
 function preload() {
   orangeCat = loadImage("orangeCat.png");
@@ -156,7 +158,7 @@ function ball() {
 
 function paddle() {
   fill(100);
-  rect(x - 400, y - 15, 150, 15, 10);
+  rect(paddleX - 400, y - 15, 150, 15, 10);
 }
 
 function gameScreen() {
@@ -174,6 +176,12 @@ function gameScreen() {
   ball();
 }
 
+// Movement of paddle inspired by Garrit's emoji example https://pixelkind.github.io/foundationsofprogramming/programming/12-02-exercise /
 function draw() {
   gameScreen();
+  if (keyIsDown(37)) {
+    paddleX = paddleX - speed;
+  } else if (keyIsDown(39)) {
+    paddleX = paddleX + speed;
+  }
 }
