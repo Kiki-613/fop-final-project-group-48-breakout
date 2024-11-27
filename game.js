@@ -7,7 +7,8 @@ let speachBubble;
 
 //paddle var/const
 const paddleMove = 5;
-let paddleX = 700;
+let paddleX = 300;
+let paddleY = 385;
 
 //ball variables
 let ballX = 350;
@@ -165,7 +166,7 @@ function ball() {
 
 function paddle() {
   fill(100);
-  rect(paddleX - 400, y - 15, 150, 15, 10);
+  rect(paddleX, paddleY, 150, 15, 10);
 }
 
 function gameScreen() {
@@ -183,9 +184,10 @@ function gameScreen() {
   ball();
 }
 
-// Paddle movement inspired by Garrit's emoji example https://pixelkind.github.io/foundationsofprogramming/programming/12-02-exercise
 function draw() {
   gameScreen();
+
+  // Paddle movement inspired by Garrit's emoji example https://pixelkind.github.io/foundationsofprogramming/programming/12-02-exercise
   if (keyIsDown(37)) {
     paddleX = paddleX - paddleMove;
   } else if (keyIsDown(39)) {
@@ -194,10 +196,16 @@ function draw() {
   // Ball movement inspired by https://editor.p5js.org/icm/sketches/BJKWv5Tn
   ballX += speedX;
   ballY += speedY;
-  if (ballX > 700 - r || ballX < 0-r || ) {
+  //Side walls blockade
+  if (ballX > 700 - r || ballX < 0 + r) {
     speedX = -speedX;
   }
-  if (ballY > 400 - r || ballY < 0-r) {
+  //Ceiling blockade (for now until we finish bowls)
+  if (ballY < 0 + r) {
+    speedY = -speedY;
+  }
+  //Paddle blockade at floor side
+  if (ballY > paddleY - r && ballX > paddleX && ballX < paddleX + 150) {
     speedY = -speedY;
   }
 }
