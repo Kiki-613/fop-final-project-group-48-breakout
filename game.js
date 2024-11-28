@@ -184,6 +184,13 @@ function gameScreen() {
   ball();
 }
 
+// Checks if ball hit the bowl and gives a value to be used in another function to make the bowl disappear
+function detectBowl() {
+  if (ballY < bowlY - r && ballX > bowlX && ballX < bowlX + "width of bowl") {
+    //"command here to give us a value that can be used in another command to make the bricks disappear"
+  }
+}
+
 function draw() {
   gameScreen();
 
