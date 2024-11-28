@@ -5,49 +5,78 @@ let greenBowl;
 let orangeBowl;
 let speachBubble;
 
-//paddle var/const
+// Paddle var/const
 const paddleMove = 5;
 let paddleX = 300;
 let paddleY = 385;
 
-//ball variables
+// Ball variables
 let ballX = 350;
-let ballY = 200;
+let ballY = 180;
 let r = 20;
 let speedX = 5;
 let speedY = 2;
 
+let bowls = [];
+let COLUMNS = 10;
+let ROWS = 3;
+
+// To make game begin at startScreen
+let state = "start";
+
+// Load pre-made images into code
 function preload() {
   orangeCat = loadImage("orangeCat.png");
-  pinkBowl = loadImage("pinkBowl.svg");
-  yellowBowl = loadImage("yellowBowl.svg");
-  greenBowl = loadImage("greenBowl.svg");
-  orangeBowl = loadImage("orangeBowl.svg");
+  pinkBowl = loadImage("pinkBowl.png");
+  yellowBowl = loadImage("yellowBowl.png");
+  greenBowl = loadImage("greenBowl.png");
+  orangeBowl = loadImage("orangeBowl.png");
   speachBubble = loadImage("speachBubble.png");
 }
 
 function setup() {
   createCanvas(700, 400);
   noStroke();
-}
 
-x = 700;
-y = 400;
-//let state = "start";
-const gridLength = 10;
-const gridSize = 70;
-let gameState = true;
+  x = 700;
+  y = 400;
 
-function drawGrid() {
-  push();
-  stroke(166, 211, 216);
-  noFill();
-  for (let x = 0; x < gridLength; x++) {
-    for (let y = 0; y < gridLength; y++) {
-      rect(x * gridSize, y * gridSize, gridSize, gridSize);
+  // Create bowls and store them in a 2D array
+  let bowlWidth = 60.5; // Width of each bowl
+  let bowlHeight = 39; // Height of each bowl
+  let margin = 10; // Space between bowls
+
+  // Loop through rows and columns to create bowls
+  for (let row = 0; row < ROWS; row++) {
+    bowls[row] = []; // Initialize the row in the 2D array
+    for (let col = 0; col < COLUMNS; col++) {
+      let x = col * (bowlWidth + margin) + 1; // Horizontal spacing
+      let y = row * (bowlHeight + margin) + 10; // Vertical spacing
+
+      let bowlImage;
+      // Alternate between different bowl colors
+      if (col % 4 === 0) bowlImage = pinkBowl;
+      else if (col % 4 === 1) bowlImage = greenBowl;
+      else if (col % 4 === 2) bowlImage = yellowBowl;
+      else bowlImage = orangeBowl;
+
+      bowls[row][col] = new Bowl(x, y, bowlWidth, bowlHeight, bowlImage);
     }
   }
-  pop();
+}
+
+class Bowl {
+  constructor(x, y, width, height, img) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.img = img;
+  }
+
+  draw() {
+    image(this.img, this.x, this.y, this.width, this.height);
+  }
 }
 
 function backgroundScreen() {
@@ -82,47 +111,6 @@ function backgroundScreen() {
   fill(240, 177, 104);
   rect(x - 700, y - 100, 700, 2);
 }
-
-class Bowl {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
-  draw() {
-    image(
-      this.x * gridSize,
-      this.y * gridSize,
-      this.width * gridSize,
-      this.height * gridSize
-    );
-  }
-}
-
-//upper row
-let pinkBowl1 = new Bowl(2, 1, 1, 1);
-let greenBowl1 = new Bowl();
-let yellowBowl1 = new Bowl();
-let orangeBowl1 = new Bowl();
-let pinkBowl2 = new Bowl(1, 1, 1, 1);
-let greenBowl2 = new Bowl();
-let yellowBowl2 = new Bowl();
-let orangeBowl2 = new Bowl();
-let pinkBowl3 = new Bowl(1, 1, 1, 1);
-let greenBowl3 = new Bowl();
-
-//lower row
-let yellowBowl3 = new Bowl();
-let orangeBowl3 = new Bowl();
-let pinkBowl4 = new Bowl(1, 1, 1, 1);
-let greenBowl4 = new Bowl();
-let yellowBowl4 = new Bowl();
-let orangeBowl4 = new Bowl();
-let pinkBowl5 = new Bowl(1, 1, 1, 1);
-let greenBowl5 = new Bowl();
-let yellowBowl5 = new Bowl();
-let orangeBowl5 = new Bowl();
 
 function startScreen() {
   backgroundScreen();
@@ -159,9 +147,44 @@ function startScreen() {
   text("Play game", x - 400, y - 70);
 }
 
+function lostScreen() {
+  backgroundScreen();
+
+  //cat and speach bubble
+  image(orangeCat, x - 300, y - 340, 400, 400);
+  image(speachBubble, x - 520, y - 340, 250, 180);
+
+  //game name
+  fill(0, 0, 0);
+  textSize(40);
+  textFont("Arial");
+  text("Crazy Kitten", x - 660, y - 180, 0);
+
+  //game instructions
+  fill(0, 0, 0);
+  textSize(10);
+  textFont("Arial");
+  text("Useless human", x - 460, y - 300);
+
+  //buttons
+  push();
+  strokeWeight(2);
+  stroke(0, 0, 0);
+  fill(0, 200, 0);
+
+  rect(x - 450, y - 100, 200, 50, 20);
+  pop();
+
+  //button "Try again"
+  fill(0, 0, 0);
+  textSize(20);
+  textFont("Arial");
+  text("Try again", x - 400, y - 70);
+}
+
 function ball() {
   fill(152, 204, 255);
-  ellipse(ballX, ballY, r * 2, r * 2);
+  ellipse(ballX, ballY, r * 1.5, r * 1.5);
 }
 
 function paddle() {
@@ -171,17 +194,25 @@ function paddle() {
 
 function gameScreen() {
   backgroundScreen();
-  drawGrid();
 
+  // Cat and speech bubble
   image(orangeCat, x - 90, y - 100, 100, 100);
   image(speachBubble, x - 180, y - 100, 100, 50);
-  image(pinkBowl, x - 710, y - 430, 100, 100);
-  image(greenBowl, x - 650, y - 430, 100, 100);
-  image(yellowBowl, x - 590, y - 430, 100, 100);
-  image(orangeBowl, x - 520, y - 430, 100, 100);
+
+  // Draw bowls
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLUMNS; col++) {
+      bowls[row][col].draw(); // Draw each bowl
+    }
+  }
 
   paddle();
   ball();
+
+  // Condition for loose screen shown
+  if (ballY > 400) {
+    state = "resultLost";
+  }
 }
 
 // Checks if ball hit the bowl and gives a value to be used in another function to make the bowl disappear
@@ -191,9 +222,16 @@ function detectBowl() {
   }
 }
 
-function draw() {
-  gameScreen();
+// To reset ball and paddle to start position after each game
+function reset() {
+  ballX = 350;
+  ballY = 180;
+  r = 20;
+  paddleX = 300;
+  paddleY = 385;
+}
 
+function draw() {
   // Paddle movement inspired by Garrit's emoji example https://pixelkind.github.io/foundationsofprogramming/programming/12-02-exercise
   if (keyIsDown(37)) {
     paddleX = paddleX - paddleMove;
@@ -215,4 +253,77 @@ function draw() {
   if (ballY > paddleY - r && ballX > paddleX && ballX < paddleX + 150) {
     speedY = -speedY;
   }
+
+  // Conditions for showing screens - linked to mouseClicked below
+  if (state === "start") {
+    startScreen();
+  } else if (state === "game") {
+    gameScreen();
+  } else if (state === "resultLost") {
+    lostScreen();
+    reset();
+  } else if (state === "resultWin") {
+    winScreen();
+    reset();
+  }
 }
+
+// switch between screens when buttons are clicked/
+function mouseClicked() {
+  if (
+    state === "start" &&
+    mouseX >= 250 &&
+    mouseX <= 450 &&
+    mouseY >= 300 &&
+    mouseY <= 350
+  ) {
+    state = "game";
+  } else if (
+    (state === "resultWin" &&
+      mouseX >= 300 &&
+      mouseX <= 400 &&
+      mouseY >= 210 &&
+      mouseY <= 260) ||
+    (state === "resultLost" &&
+      mouseX >= 250 &&
+      mouseX <= 450 &&
+      mouseY >= 300 &&
+      mouseY <= 350)
+  ) {
+    state = "start";
+  }
+}
+
+//to do list
+
+//Idea of the game
+//The cat need help from you to destroy all the bowls. The cat will cheer you on
+//while you play. If you win, the cat will thank you but if you lose - the cat will
+//disapear and the angry human will show up will blame everything on you.
+// * - a thought is that we can add eyes on the cat so it looks like it is hypnotized
+//     and trying to control the behaviour of the human!
+
+//start screen
+//- make the button interactive (move a bit to the left?)
+//- write instructions in the speach bubble
+//- decide name
+//- make the button interactive
+
+//game screen
+//- the the bowls interactive
+//- make the paddle stop at x (0 & 700)
+//- make ball stop at y = 400
+//- when the ball hits a bowl - speach bubble will appear with random text
+
+//win screen
+//- create a "play again" button and make it interactive
+//- change the text in the speach bubble
+//- maybe add some fireworks?
+
+//lose screen
+//- create a "play again" button and make it interactive
+//- change the text in the speach bubble
+//- change the cat to a human?
+
+//Game states
+//fix mouseClicked (start --> game)(game --> win)(game --> lose)
