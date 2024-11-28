@@ -229,6 +229,8 @@ function reset() {
   r = 20;
   paddleX = 300;
   paddleY = 385;
+  speedX = 5;
+  speedY = 2;
 }
 
 function draw() {
