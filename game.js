@@ -360,20 +360,6 @@ function winScreen() {
 }
 
 function checkBallCollisionWithBowl(ball, bowl) {
-  //Randomize kitten text based on array, inspired by Garrit's video no. 15
-  function randomSpeech(array) {
-    let randomIndex = Math.floor(Math.random() * array.length);
-    return array[randomIndex];
-  }
-  //Array of texts for game screen kitten
-  let speech = [
-    "Way to go!",
-    "Break them all!",
-    "SMASH!",
-    "You rock!",
-    "BOOM!",
-  ];
-
   // Check if the ball is colliding with the bowl
   if (
     ball.x > bowl.x &&
@@ -381,11 +367,6 @@ function checkBallCollisionWithBowl(ball, bowl) {
     ball.y - ball.r < bowl.y + bowl.height &&
     ball.y + ball.r > bowl.y
   ) {
-    textSize(10);
-    textAlign(CENTER);
-    textFont("Arial");
-    let kittenSpeech = randomSpeech(speech);
-    text(kittenSpeech, x - 65, y - 60, 20, 30);
     // Collision detected, return true
     return true;
   }
@@ -421,6 +402,32 @@ function gameScreen() {
         }
       }
     }
+  }
+
+  //Randomize kitten text based on array, inspired by Garrit's video no. 15
+  function randomSpeech(speech) {
+    let randomIndex = Math.floor(Math.random() * speech.length);
+    return speech[randomIndex];
+  }
+  //Array of texts for game screen kitten
+  const speech = [
+    "Way to go!",
+    "Break them all!",
+    "SMASH!",
+    "You rock!",
+    "BOOM!",
+  ];
+
+  if (this.hit === true) {
+    // to draw a white rectangle as background in speech bubble at every hit so text doesn't compile on top
+    fill(255, 255, 255);
+    rect(530, 320, 80, 15);
+    // Parameters for kitten text
+    textSize(12);
+    textAlign(CENTER);
+    textFont("Arial");
+    const kittenSpeech = randomSpeech(speech);
+    text(kittenSpeech, 530, 320);
   }
 
   // After checking all bowls, remove the ones marked for removal
