@@ -156,8 +156,8 @@ class Ball {
     this.x = 350;
     this.y = 180;
     this.r = 20;
-    this.speedX = random(3, 7); // Randomize horizontal speed when resetting the ball
-    this.speedY = random(2, 5); // Randomize vertical speed when resetting the ball
+    this.speedX = 4;
+    this.speedY = 3;
   }
 }
 
@@ -249,6 +249,10 @@ function startScreen() {
   }
 
   catEyes = new CatEyes(350, 300); // Set initial position for the eyes
+
+  wallColor = color(255, 213, 213);
+  catEyes.move(); // Update the position and angle of rotation
+  catEyes.draw(); // Draw the eyes at the updated position and rotation
 
   // Game instructions
   fill(0, 0, 0);
@@ -356,6 +360,20 @@ function winScreen() {
 }
 
 function checkBallCollisionWithBowl(ball, bowl) {
+  //Randomize kitten text based on array, inspired by Garrit's video no. 15
+  function randomSpeech(array) {
+    let randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
+  }
+  //Array of texts for game screen kitten
+  let speech = [
+    "Way to go!",
+    "Break them all!",
+    "SMASH!",
+    "You rock!",
+    "BOOM!",
+  ];
+
   // Check if the ball is colliding with the bowl
   if (
     ball.x > bowl.x &&
@@ -363,10 +381,14 @@ function checkBallCollisionWithBowl(ball, bowl) {
     ball.y - ball.r < bowl.y + bowl.height &&
     ball.y + ball.r > bowl.y
   ) {
+    textSize(10);
+    textAlign(CENTER);
+    textFont("Arial");
+    let kittenSpeech = randomSpeech(speech);
+    text(kittenSpeech, x - 65, y - 60, 20, 30);
     // Collision detected, return true
     return true;
   }
-  return false;
 }
 
 function gameScreen() {
@@ -410,7 +432,6 @@ function gameScreen() {
   // Check if the player has won (all bowls are gone)
   if (bowlsRemaining === 0) {
     state = "resultWin"; // All bowls are gone, transition to win screen
-    return; // Exit the game screen early to prevent further processing
   }
 
   // Continue with paddle and ball movement
@@ -443,9 +464,6 @@ function draw() {
   // Conditions for showing screens - linked to mouseClicked below
   if (state === "start") {
     startScreen();
-    wallColor = color(255, 213, 213);
-    catEyes.move(); // Update the position and angle of rotation
-    catEyes.draw(); // Draw the eyes at the updated position and rotation
   } else if (state === "game") {
     gameScreen();
     wallColor = color(255, 213, 213);
