@@ -5,33 +5,28 @@ let greenBowl;
 let orangeBowl;
 let speachBubble;
 
-// Paddle var/const
-const paddleMove = 5;
-let paddleX = 300;
-let paddleY = 385;
-
-// Ball variables
-let ballX = 350;
-let ballY = 180;
-let r = 20;
-let speedX = 5;
-let speedY = 2;
-
 let bowls = [];
 let COLUMNS = 10;
-let ROWS = 3;
+let ROWS = 2;
 
-// To make game begin at startScreen
 let state = "start";
+
+let wallColor;
+let paddle;
+let ball;
+angleMode(DEGREES);
 
 // Load pre-made images into code
 function preload() {
+  angryPerson = loadImage("angryPerson.png");
   orangeCat = loadImage("orangeCat.png");
   pinkBowl = loadImage("pinkBowl.png");
   yellowBowl = loadImage("yellowBowl.png");
   greenBowl = loadImage("greenBowl.png");
   orangeBowl = loadImage("orangeBowl.png");
   speachBubble = loadImage("speachBubble.png");
+  reverseSpeachBubble = loadImage("reverseSpeachBubble.png");
+  hypnoEyes = loadImage("hypnoEyes.png");
 }
 
 function setup() {
@@ -63,6 +58,12 @@ function setup() {
       bowls[row][col] = new Bowl(x, y, bowlWidth, bowlHeight, bowlImage);
     }
   }
+
+  wallColor = color(255, 213, 213);
+
+  // Initialize paddle and ball
+  paddle = new Paddle();
+  ball = new Ball();
 }
 
 class Bowl {
@@ -72,15 +73,96 @@ class Bowl {
     this.width = width;
     this.height = height;
     this.img = img;
+    this.hit = false; // Track if the bowl has been hit
   }
 
   draw() {
-    image(this.img, this.x, this.y, this.width, this.height);
+    if (!this.hit) {
+      // Only draw if the bowl has not been hit
+      image(this.img, this.x, this.y, this.width, this.height);
+    }
+  }
+}
+
+class Paddle {
+  constructor() {
+    this.x = 300;
+    this.y = 385;
+    this.width = 150;
+    this.height = 15;
+    this.speed = 8;
+  }
+
+  move() {
+    if (keyIsDown(37)) {
+      // Left arrow key
+      this.x = max(this.x - this.speed, 0);
+    } else if (keyIsDown(39)) {
+      // Right arrow key
+      this.x = min(this.x + this.speed, width - this.width);
+    }
+  }
+
+  draw() {
+    fill(100);
+    rect(this.x, this.y, this.width, this.height, 10);
+  }
+}
+
+class Ball {
+  constructor() {
+    this.x = 350;
+    this.y = 180;
+    this.r = 20;
+    this.speedX = 4;
+    this.speedY = 3;
+  }
+
+  move() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // Side walls
+    if (this.x > width - this.r || this.x < this.r) {
+      this.speedX = -this.speedX;
+    }
+
+    // Ceiling
+    if (this.y < this.r) {
+      this.speedY = -this.speedY;
+    }
+
+    // Paddle collision
+    if (
+      this.y > paddle.y - this.r &&
+      this.x > paddle.x &&
+      this.x < paddle.x + paddle.width
+    ) {
+      this.speedY = -this.speedY;
+    }
+
+    // Ball out of bounds
+    if (this.y > height) {
+      state = "resultLost";
+    }
+  }
+
+  draw() {
+    fill(152, 204, 255);
+    ellipse(this.x, this.y, this.r * 1.5, this.r * 1.5);
+  }
+
+  reset() {
+    this.x = 350;
+    this.y = 180;
+    this.r = 20;
+    this.speedX = random(3, 7); // Randomize horizontal speed when resetting the ball
+    this.speedY = random(2, 5); // Randomize vertical speed when resetting the ball
   }
 }
 
 function backgroundScreen() {
-  //floor brown
+  // Floor brown
   fill(246, 198, 150);
   rect(x - 700, y - 10, 700, 10);
   rect(x - 700, y - 25, 700, 10);
@@ -90,7 +172,7 @@ function backgroundScreen() {
   rect(x - 700, y - 85, 700, 10);
   rect(x - 700, y - 100, 700, 10);
 
-  //floor light brown
+  // Floor light brown
   fill(246, 206, 167);
   rect(x - 700, y - 15, 700, 5);
   rect(x - 700, y - 30, 700, 5);
@@ -99,11 +181,11 @@ function backgroundScreen() {
   rect(x - 700, y - 75, 700, 5);
   rect(x - 700, y - 90, 700, 5);
 
-  //wallpaper
-  fill(255, 213, 213);
+  // Wallpaper
+  fill(wallColor);
   rect(x - 700, y - 400, 700, 300);
 
-  //board floor
+  // Board floor
   fill(250, 210, 170);
   rect(x - 700, y - 120, 700, 20);
   fill(255, 255, 255);
@@ -115,81 +197,180 @@ function backgroundScreen() {
 function startScreen() {
   backgroundScreen();
 
-  //cat and speach bubble
+  // Cat and speach bubble
   image(orangeCat, x - 300, y - 340, 400, 400);
   image(speachBubble, x - 520, y - 340, 250, 180);
 
-  //game name
+  class CatEyes {
+    constructor(x, y) {
+      this.x = 700; // Receive x position for the eyes (use dynamic x position)
+      this.y = 400; // Receive y position for the eyes (use dynamic y position)
+      this.width = 50; // Define width for each eye image
+      this.height = 50; // Define height for each eye image
+      this.angle = 1; // Initial angle of rotation (start from 0)
+      this.speed = 10; // Initial speed of rotation
+    }
+
+    move() {
+      // Increment the angle to rotate the eyes
+      this.angle += 1 * this.speed; // Rotate 1 degree per frame
+      if (this.angle >= 360) {
+        this.angle = 0; // Reset angle after a full rotation
+      }
+    }
+
+    draw() {
+      // Draw the first eye (left)
+      push();
+      translate(this.x - 140, this.y - 230); // Position of the first eye
+      rotate(this.angle); // Apply rotation to the first eye
+      image(
+        hypnoEyes,
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      ); // Draw first eye centered
+      pop();
+
+      // Draw the second eye (right)
+      push();
+      translate(this.x - 75, this.y - 230); // Position of the second eye
+      rotate(this.angle); // Apply the same rotation to the second eye
+      image(
+        hypnoEyes,
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      ); // Draw second eye centered
+      pop();
+    }
+  }
+
+  catEyes = new CatEyes(350, 300); // Set initial position for the eyes
+
+  // Game instructions
+  fill(0, 0, 0);
+  textSize(14.5);
+  textAlign(CENTER);
+  textFont("Arial");
+  let gameInstructions =
+    "You are under my control now! You will help me to crash all the bowls. Move the paddle with the right and left arrow keys. If you fail, my human will be maaaaad...at you!";
+  text(gameInstructions, x - 495, y - 311, 205, 300);
+
+  // Game name
   fill(0, 0, 0);
   textSize(40);
   textFont("Arial");
-  text("Crazy Kitten", x - 660, y - 180, 0);
+  text("HypnoPaws", x - 550, y - 170, 0);
 
-  //game instructions
-  fill(0, 0, 0);
-  textSize(10);
-  textFont("Arial");
-  text("Move the padle bla bla bla", x - 460, y - 300);
-
-  //buttons
+  // Buttons
   push();
   strokeWeight(2);
   stroke(0, 0, 0);
-  fill(0, 200, 0);
+  fill(204, 255, 204);
 
   rect(x - 450, y - 100, 200, 50, 20);
   pop();
 
-  //button "play game"
+  // Button "play game"
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  text("Play game", x - 400, y - 70);
+  text("Play game", x - 350, y - 70);
 }
 
 function lostScreen() {
   backgroundScreen();
 
-  //cat and speach bubble
-  image(orangeCat, x - 300, y - 340, 400, 400);
-  image(speachBubble, x - 520, y - 340, 250, 180);
+  // Cat and speach bubble
+  image(orangeCat, x - 130, y - 50, 50, 50);
+  image(angryPerson, x - 400, y - 340, 400, 400);
+  image(speachBubble, x - 550, y - 340, 250, 180);
+  image(reverseSpeachBubble, x - 80, y - 70, 50, 35);
 
-  //game name
+  // Angry person talking
   fill(0, 0, 0);
-  textSize(40);
+  textSize(15);
+  textAlign(CENTER);
   textFont("Arial");
-  text("Crazy Kitten", x - 660, y - 180, 0);
+  let lostText =
+    "WHAT ARE YOU DOING!!! How dare you blame my kitten for this, this is all your fault!";
+  text(lostText, x - 525, y - 295, 205, 300);
 
-  //game instructions
+  // Kitten laughing
   fill(0, 0, 0);
   textSize(10);
+  textAlign(CENTER);
   textFont("Arial");
-  text("Useless human", x - 460, y - 300);
+  let catText = "HAHA!";
+  text(catText, x - 65, y - 60, 20, 30);
 
-  //buttons
+  // Buttons
   push();
   strokeWeight(2);
   stroke(0, 0, 0);
-  fill(0, 200, 0);
+  fill(204, 255, 204);
 
-  rect(x - 450, y - 100, 200, 50, 20);
+  rect(x - 550, y - 100, 200, 50, 20);
   pop();
 
-  //button "Try again"
+  // Button "Try again"
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  text("Try again", x - 400, y - 70);
+  text("Try again", x - 450, y - 70);
+
+  //if you lose, the color of the wallpaper will change
+  if (state === "resultLost") {
+    wallColor = color(255, 102, 102);
+  }
 }
 
-function ball() {
-  fill(152, 204, 255);
-  ellipse(ballX, ballY, r * 1.5, r * 1.5);
+function winScreen() {
+  backgroundScreen();
+
+  // Cat and speach bubble
+  image(orangeCat, x - 300, y - 340, 400, 400);
+  image(speachBubble, x - 520, y - 340, 250, 180);
+
+  // Game instructions
+  fill(0, 0, 0);
+  textSize(15);
+  textAlign(CENTER);
+  textFont("Arial");
+  let wonText = "GOOD JOB!";
+  text(wonText, x - 500, y - 295, 205, 300);
+
+  // Buttons
+  push();
+  strokeWeight(2);
+  stroke(0, 0, 0);
+  fill(204, 255, 204);
+
+  rect(x - 550, y - 100, 200, 50, 20);
+  pop();
+
+  // Button "Try again"
+  fill(0, 0, 0);
+  textSize(20);
+  textFont("Arial");
+  text("Try again", x - 450, y - 70);
 }
 
-function paddle() {
-  fill(100);
-  rect(paddleX, paddleY, 150, 15, 10);
+function checkBallCollisionWithBowl(ball, bowl) {
+  // Check if the ball is colliding with the bowl
+  if (
+    ball.x > bowl.x &&
+    ball.x < bowl.x + bowl.width &&
+    ball.y - ball.r < bowl.y + bowl.height &&
+    ball.y + ball.r > bowl.y
+  ) {
+    // Collision detected, return true
+    return true;
+  }
+  return false;
 }
 
 function gameScreen() {
@@ -199,78 +380,89 @@ function gameScreen() {
   image(orangeCat, x - 90, y - 100, 100, 100);
   image(speachBubble, x - 180, y - 100, 100, 50);
 
-  // Draw bowls
+  let bowlsToRemove = []; // Array to collect bowls that need to be removed
+  let bowlsRemaining = 0; // Count of remaining bowls
+
+  // Draw bowls and check for collisions
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLUMNS; col++) {
-      bowls[row][col].draw(); // Draw each bowl
+      let bowl = bowls[row][col]; // Get the current bowl
+
+      if (bowl) {
+        // Make sure the bowl still exists (it could be removed)
+        bowlsRemaining++; // Count remaining bowls
+        bowls[row][col].draw(); // Draw each bowl
+
+        // Check if the ball collides with the bowl
+        if (checkBallCollisionWithBowl(ball, bowl)) {
+          // If collision detected, mark this bowl for removal
+          bowlsToRemove.push({ row, col });
+
+          // Reverse the ball's Y-speed to make it bounce
+          ball.speedY = -ball.speedY;
+        }
+      }
     }
   }
 
-  paddle();
-  ball();
+  // After checking all bowls, remove the ones marked for removal
+  for (let i = 0; i < bowlsToRemove.length; i++) {
+    let { row, col } = bowlsToRemove[i];
+    bowls[row].splice(col, 1); // Remove bowl from the array
+  }
 
-  // Condition for loose screen shown
-  if (ballY > 400) {
-    state = "resultLost";
+  // Check if the player has won (all bowls are gone)
+  if (bowlsRemaining === 0) {
+    state = "resultWin"; // All bowls are gone, transition to win screen
+    return; // Exit the game screen early to prevent further processing
+  }
+
+  // Continue with paddle and ball movement
+  paddle.move();
+  paddle.draw();
+  ball.move();
+  ball.draw();
+
+  // Check if the ball falls out of bounds
+  if (ball.y > height) {
+    wallColor = color(255, 102, 102); // Set background to red
+    state = "resultLost"; // Ball fell below the screen, you lost
   }
 }
 
-// Checks if ball hit the bowl and gives a value to be used in another function to make the bowl disappear
-function detectBowl() {
-  if (ballY < bowlY - r && ballX > bowlX && ballX < bowlX + "width of bowl") {
-    //"command here to give us a value that can be used in another command to make the bricks disappear"
-  }
-}
-
-// To reset ball and paddle to start position after each game
 function reset() {
-  ballX = 350;
-  ballY = 180;
-  r = 20;
-  paddleX = 300;
-  paddleY = 385;
-  speedX = 5;
-  speedY = 2;
+  ball.reset();
+  paddle.x = 300;
+  paddle.y = 385;
+
+  // Reset bowls (unhit)
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLUMNS; col++) {
+      bowls[row][col].hit = false; // Reset bowl hit state
+    }
+  }
 }
 
 function draw() {
-  // Paddle movement inspired by Garrit's emoji example https://pixelkind.github.io/foundationsofprogramming/programming/12-02-exercise
-  if (keyIsDown(37)) {
-    paddleX = paddleX - paddleMove;
-  } else if (keyIsDown(39)) {
-    paddleX = paddleX + paddleMove;
-  }
-  // Ball movement inspired by https://editor.p5js.org/icm/sketches/BJKWv5Tn
-  ballX += speedX;
-  ballY += speedY;
-  //Side walls blockade
-  if (ballX > 700 - r || ballX < 0 + r) {
-    speedX = -speedX;
-  }
-  //Ceiling blockade (for now until we finish bowls)
-  if (ballY < 0 + r) {
-    speedY = -speedY;
-  }
-  //Paddle blockade at floor side
-  if (ballY > paddleY - r && ballX > paddleX && ballX < paddleX + 150) {
-    speedY = -speedY;
-  }
-
   // Conditions for showing screens - linked to mouseClicked below
   if (state === "start") {
     startScreen();
+    wallColor = color(255, 213, 213);
+    catEyes.move(); // Update the position and angle of rotation
+    catEyes.draw(); // Draw the eyes at the updated position and rotation
   } else if (state === "game") {
     gameScreen();
+    wallColor = color(255, 213, 213);
   } else if (state === "resultLost") {
     lostScreen();
     reset();
-  } else if (state === "resultWin") {
+  } else if (state === "resultWi") {
     winScreen();
     reset();
   }
 }
 
-// switch between screens when buttons are clicked/
+// Switch between screens when buttons are clicked
 function mouseClicked() {
   if (
     state === "start" &&
@@ -281,16 +473,19 @@ function mouseClicked() {
   ) {
     state = "game";
   } else if (
-    (state === "resultWin" &&
-      mouseX >= 300 &&
-      mouseX <= 400 &&
-      mouseY >= 210 &&
-      mouseY <= 260) ||
-    (state === "resultLost" &&
-      mouseX >= 250 &&
-      mouseX <= 450 &&
-      mouseY >= 300 &&
-      mouseY <= 350)
+    state === "resultWin" &&
+    mouseX >= 155 &&
+    mouseX <= 350 &&
+    mouseY >= 300 &&
+    mouseY <= 350
+  ) {
+    state = "start";
+  } else if (
+    state === "resultLost" &&
+    mouseX >= 155 &&
+    mouseX <= 350 &&
+    mouseY >= 300 &&
+    mouseY <= 350
   ) {
     state = "start";
   }
@@ -306,26 +501,14 @@ function mouseClicked() {
 //     and trying to control the behaviour of the human!
 
 //start screen
-//- make the button interactive (move a bit to the left?)
-//- write instructions in the speach bubble
-//- decide name
-//- make the button interactive
+//- decide and fix the game name
+// - change the text?
 
 //game screen
-//- the the bowls interactive
-//- make the paddle stop at x (0 & 700)
-//- make ball stop at y = 400
-//- when the ball hits a bowl - speach bubble will appear with random text
+//- add hypnotizing eyes to the cat
+//- when the ball hits a bowl - speach bubble will appear with a random text
+//- fix the paddle so the ball doesn't get stuck on it (block the sides with x & y)
 
 //win screen
-//- create a "play again" button and make it interactive
-//- change the text in the speach bubble
+//- change the text?
 //- maybe add some fireworks?
-
-//lose screen
-//- create a "play again" button and make it interactive
-//- change the text in the speach bubble
-//- change the cat to a human?
-
-//Game states
-//fix mouseClicked (start --> game)(game --> win)(game --> lose)
