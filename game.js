@@ -282,6 +282,7 @@ function startScreen() {
 }
 
 function lostScreen() {
+  wallColor = color(255, 102, 102);
   backgroundScreen();
 
   // Cat and speach bubble
@@ -321,11 +322,6 @@ function lostScreen() {
   textSize(20);
   textFont("Arial");
   text("Try again", x - 450, y - 70);
-
-  //if you lose, the color of the wallpaper will change
-  if (state === "resultLost") {
-    wallColor = color(255, 102, 102);
-  }
 }
 
 function winScreen() {
