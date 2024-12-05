@@ -16,6 +16,13 @@ let paddle;
 let ball;
 angleMode(DEGREES);
 
+// Create bowls and store them in a 2D array
+let bowlWidth = 60.5; // Width of each bowl
+let bowlHeight = 39; // Height of each bowl
+let margin = 10; // Space between bowls
+
+let bowlImage;
+
 // Load pre-made images into code
 function preload() {
   angryPerson = loadImage("angryPerson.png");
@@ -36,11 +43,6 @@ function setup() {
   x = 700;
   y = 400;
 
-  // Create bowls and store them in a 2D array
-  let bowlWidth = 60.5; // Width of each bowl
-  let bowlHeight = 39; // Height of each bowl
-  let margin = 10; // Space between bowls
-
   // Loop through rows and columns to create bowls
   for (let row = 0; row < ROWS; row++) {
     bowls[row] = []; // Initialize the row in the 2D array
@@ -48,7 +50,6 @@ function setup() {
       let x = col * (bowlWidth + margin) + 1; // Horizontal spacing
       let y = row * (bowlHeight + margin) + 10; // Vertical spacing
 
-      let bowlImage;
       // Alternate between different bowl colors
       if (col % 4 === 0) bowlImage = pinkBowl;
       else if (col % 4 === 1) bowlImage = greenBowl;
@@ -356,7 +357,7 @@ function winScreen() {
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  text("Try again", x - 450, y - 70);
+  text("Play again", x - 450, y - 70);
 }
 
 function checkBallCollisionWithBowl(ball, bowl) {
@@ -371,6 +372,13 @@ function checkBallCollisionWithBowl(ball, bowl) {
     return true;
   }
 }
+//Randomize kitten text based on array, inspired by Garrit's video no. 15
+function randomSpeech(speech) {
+  let randomIndex = Math.floor(Math.random() * speech.length);
+  return speech[randomIndex];
+}
+//Array of texts for game screen kitten
+const speech = ["Way to go!", "Break them!", "SMASH!", "You rock!", "BOOM!"];
 
 function gameScreen() {
   backgroundScreen();
@@ -396,38 +404,20 @@ function gameScreen() {
         if (checkBallCollisionWithBowl(ball, bowl)) {
           // If collision detected, mark this bowl for removal
           bowlsToRemove.push({ row, col });
+          // to draw a white rectangle as background in speech bubble at every hit so text doesn't compile on top
+          // Parameters for kitten text
+          fill(0, 0, 0);
+          textSize(12);
+          textAlign(CENTER);
+          textFont("Arial");
+          const kittenSpeech = randomSpeech(speech);
+          text(kittenSpeech, 570, 320);
 
           // Reverse the ball's Y-speed to make it bounce
           ball.speedY = -ball.speedY;
         }
       }
     }
-  }
-
-  //Randomize kitten text based on array, inspired by Garrit's video no. 15
-  function randomSpeech(speech) {
-    let randomIndex = Math.floor(Math.random() * speech.length);
-    return speech[randomIndex];
-  }
-  //Array of texts for game screen kitten
-  const speech = [
-    "Way to go!",
-    "Break them all!",
-    "SMASH!",
-    "You rock!",
-    "BOOM!",
-  ];
-
-  if (this.hit === true) {
-    // to draw a white rectangle as background in speech bubble at every hit so text doesn't compile on top
-    fill(255, 255, 255);
-    rect(530, 320, 80, 15);
-    // Parameters for kitten text
-    textSize(12);
-    textAlign(CENTER);
-    textFont("Arial");
-    const kittenSpeech = randomSpeech(speech);
-    text(kittenSpeech, 530, 320);
   }
 
   // After checking all bowls, remove the ones marked for removal
@@ -460,9 +450,29 @@ function reset() {
   paddle.y = 385;
 
   // Reset bowls (unhit)
+  // for (let row = 0; row < ROWS; row++) {
+  //   for (let col = 0; col < COLUMNS; col++) {
+  //     //      bowls[row][col] = false; // Reset bowl hit state
+  //     x = 700;
+  //     y = 400;
+  //     bowls[row][col] = new Bowl(x, y, bowlWidth, bowlHeight, bowlImage);
+  //   }
+  // }
+
+  // Loop through rows and columns to create bowls
   for (let row = 0; row < ROWS; row++) {
+    bowls[row] = []; // Initialize the row in the 2D array
     for (let col = 0; col < COLUMNS; col++) {
-      bowls[row][col].hit = false; // Reset bowl hit state
+      let x = col * (bowlWidth + margin) + 1; // Horizontal spacing
+      let y = row * (bowlHeight + margin) + 10; // Vertical spacing
+
+      // Alternate between different bowl colors
+      if (col % 4 === 0) bowlImage = pinkBowl;
+      else if (col % 4 === 1) bowlImage = greenBowl;
+      else if (col % 4 === 2) bowlImage = yellowBowl;
+      else bowlImage = orangeBowl;
+
+      bowls[row][col] = new Bowl(x, y, bowlWidth, bowlHeight, bowlImage);
     }
   }
 }
@@ -477,7 +487,7 @@ function draw() {
   } else if (state === "resultLost") {
     lostScreen();
     reset();
-  } else if (state === "resultWi") {
+  } else if (state === "resultWin") {
     winScreen();
     reset();
   }
